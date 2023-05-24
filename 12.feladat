@@ -1,0 +1,83 @@
+//Írja fel a minimumkiválasztásos rendezés pszeudó kódját!
+
+procedure selectionSort(A: tömb, n: egész)
+    for i := 0 to n-1 do
+        minIndex := i
+        for j := i+1 to n do
+            if A[j] < A[minIndex] then
+                minIndex := j
+            end if
+        end for
+        swap(A[i], A[minIndex])
+    end for
+end procedure
+//Írjon egy rekurzív felbontásra épülő párhuzamos algoritmust a rendezési feladat megoldására!
+//Az algoritmus a "Merge Sort" nevű rendezési algoritmuson alapul, és több szálon végezheti el a rendezési folyamatot.
+import threading
+
+def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+
+    # A tömb felbontása két részre
+    mid = len(arr) // 2
+    left = arr[:mid]
+    right = arr[mid:]
+
+    # Rekurzív hívás a két rész tömbjére
+    left = merge_sort(left)
+    right = merge_sort(right)
+
+    # Párhuzamosan összefésüljük a két rész tömbjét
+    return merge(left, right)
+
+def merge(left, right):
+    merged = []
+
+    # Az összefésülési folyamat
+    while left and right:
+        if left[0] <= right[0]:
+            merged.append(left.pop(0))
+        else:
+            merged.append(right.pop(0))
+
+    # A maradék elemek hozzáadása
+    merged.extend(left)
+    merged.extend(right)
+
+    return merged
+
+def parallel_merge_sort(arr, num_threads):
+    if len(arr) <= 1:
+        return arr
+
+    # Az eredeti tömb felbontása több részre
+    num_chunks = min(num_threads, len(arr))
+    chunk_size = len(arr) // num_chunks
+
+    chunks = [arr[i:i+chunk_size] for i in range(0, len(arr), chunk_size)]
+
+    # Párhuzamos szálak inicializálása és indítása
+    threads = []
+    for i in range(num_chunks):
+        thread = threading.Thread(target=merge_sort, args=(chunks[i],))
+        threads.append(thread)
+        thread.start()
+
+    # Szálak befejezésének várása
+    for thread in threads:
+        thread.join()
+
+    # Összefésülés az egyes résztömbök eredményeiből
+    merged = []
+    for chunk in chunks:
+        merged.extend(chunk)
+
+    # Végső összefésülés a rendezett résztömbök között
+    return merge_sort(merged)
+
+# Példa használat
+arr = [5, 3, 8, 1, 2, 7, 6, 4]
+num_threads = 4
+sorted_arr = parallel_merge_sort(arr, num_threads)
+print(sorted_arr)
