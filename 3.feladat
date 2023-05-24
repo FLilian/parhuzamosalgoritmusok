@@ -1,0 +1,124 @@
+#include <stdio.h>
+
+
+void fillArray(int* arr, int size) {
+    printf("Adja meg a szamokat:\n");
+    for (int i = 0; i < size; i++) {
+        printf("arr[%d] = ", i);
+        scanf_s("%d", &arr[i]);
+    }
+}
+
+
+int calculateSum(int* arr, int size) {
+    int sum = 0;
+    for (int i = 0; i < size; i++) {
+        sum += arr[i];
+    }
+    return sum;
+}
+
+
+int findMinimum(int* arr, int size) {
+    int min = arr[0];
+    for (int i = 1; i < size; i++) {
+        if (arr[i] < min) {
+            min = arr[i];
+        }
+    }
+    return min;
+}
+
+int findMaximum(int* arr, int size) {
+    int max = arr[0];
+    for (int i = 1; i < size; i++) {
+        if (arr[i] > max) {
+            max = arr[i];
+        }
+    }
+    return max;
+}
+
+int main() {
+    int size;
+    printf("Adja meg a tomb meretet: ");
+    scanf_s("%d", &size);
+
+    int* arr = (int*)malloc(size * sizeof(int));
+    fillArray(arr, size);
+
+    int sum = calculateSum(arr, size);
+    int min = findMinimum(arr, size);
+    int max = findMaximum(arr, size);
+
+    printf("Elemek osszege: %d\n", sum);
+    printf("Minimum ertek: %d\n", min);
+    printf("Maximum ertek: %d\n", max);
+
+    free(arr);
+
+    return 0;
+}
+// rekurzív megoldás
+
+#include <stdio.h>
+
+// Tömb feltöltése
+void fillArray(int* arr, int size) {
+    printf("Adja meg a szamokat:\n");
+    for (int i = 0; i < size; i++) {
+        printf("arr[%d] = ", i);
+        scanf("%d", &arr[i]);
+    }
+}
+
+// Elemek összegének kiszámítása (rekurzív)
+int calculateSumRecursive(int* arr, int size) {
+    if (size == 0) {
+        return 0;
+    } else {
+        return arr[size - 1] + calculateSumRecursive(arr, size - 1);
+    }
+}
+
+// Minimum érték meghatározása (rekurzív)
+int findMinimumRecursive(int* arr, int size) {
+    if (size == 1) {
+        return arr[0];
+    } else {
+        int minRest = findMinimumRecursive(arr, size - 1);
+        return (arr[size - 1] < minRest) ? arr[size - 1] : minRest;
+    }
+}
+
+// Maximum érték meghatározása (rekurzív)
+int findMaximumRecursive(int* arr, int size) {
+    if (size == 1) {
+        return arr[0];
+    } else {
+        int maxRest = findMaximumRecursive(arr, size - 1);
+        return (arr[size - 1] > maxRest) ? arr[size - 1] : maxRest;
+    }
+}
+
+int main() {
+    int size;
+    printf("Adja meg a tomb meretet: ");
+    scanf("%d", &size);
+
+    int* arr = (int*)malloc(size * sizeof(int));
+    fillArray(arr, size);
+
+    int sum = calculateSumRecursive(arr, size);
+    int min = findMinimumRecursive(arr, size);
+    int max = findMaximumRecursive(arr, size);
+
+    printf("Elemek osszege (rekurziv): %d\n", sum);
+    printf("Minimum ertek (rekurziv): %d\n", min);
+    printf("Maximum ertek (rekurziv): %d\n", max);
+
+    free(arr);
+
+    return 0;
+}
+
