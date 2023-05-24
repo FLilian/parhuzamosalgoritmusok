@@ -1,0 +1,30 @@
+//Írja fel a beszúró rendezés pszeudó kódját!
+procedure InsertionSort(arr)
+    for i = 1 to length(arr) - 1 do
+        key = arr[i]
+        j = i - 1
+        while j >= 0 and arr[j] > key do
+            arr[j + 1] = arr[j]
+            j = j - 1
+        arr[j + 1] = key
+    end for
+end procedure
+//Vizsgáljuk meg egy 10 elemű minta rendezése esetében, hogy két beszúró iterátor használatával milyen gyorsítás érhető el! 
+(Feltételezzük, hogy a számítások várakoztatás nélkül párhuzamosan futnak!)
+
+procedure InsertionSortWithDualIterators(arr)
+    for i = 1 to length(arr) - 1 do
+        key = arr[i]
+        j = i - 1
+        it1 = j
+        it2 = j + 1
+        
+        while it1 >= 0 and arr[it1] > key do
+            arr[it2] = arr[it1]
+            it1 = it1 - 1
+            it2 = it2 - 1
+        end while
+        
+        arr[it2] = key
+    end for
+end procedure
