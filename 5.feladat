@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_THREADS 4
+
+void EREW_PREFIX(int* arr, int n, int threads) {
+    int* prefix = malloc(n * sizeof(int));
+    memset(prefix, 0, n * sizeof(int));
+
+    for (int step = 1; step < n; step *= 2) {
+        #pragma omp parallel for num_threads(threads)
+        for (int i = step; i < n; i++) {
+            prefix[i] = arr[i] + arr[i - step];
+        }
+
+        memcpy(arr, prefix, n * sizeof(int));
+    }
+
+    free(prefix);
+}
+
+void saveWorkDataToFile(char* filename, int* workData, int n, int threads) {
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) {
+        printf("Hiba a fajl megnyitasa soran.\n");
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < threads; j++) {
+            if (workData[i * threads + j] > 0) {
+                fprintf(file, ".");
+            } else {
+                fprintf(file, "#");
+            }
+        }
+        fprintf(file, "\n");
+    }
+
+    fclose(file);
+}
+
+int main() {
+    int n = 100;  // Elemek száma
+    int threads = MAX_THREADS;  // Szálak száma
+    int* arr = malloc(n * sizeof(int));
+    int* workData = malloc(n * threads * sizeof(int));
+
+    // Tömb feltöltése random értékekkel
+    for (int i = 0; i < n; i++) {
+        arr[i] = rand() % 100;
+    }
+
+    // EREW_PREFIX algoritmus futtatása
+    EREW_PREFIX(arr, n, threads);
+
+    // Munka adatok elmentése fájlba
+    saveWorkDataToFile("work_data.txt", workData, n, threads);
+
+    // Munka, költség, gyorsítás, hatékonyság kiszámítása
+    int totalWork = 0;
+    int totalCost = n * (threads - 1);
+    for (int i = 0; i < n * threads; i++) {
+        if (workData[i] > 0) {
+            totalWork++;
+        }
+    }
+
+    double speedup = (double)totalCost / (double)(totalCost + totalWork);
+    double efficiency = speedup / threads;
+
+    printf("Munka: %d\n", totalWork);
+    printf("Költség: %d\n", totalCost);
+    printf("Gyorsítás: %.2f\n", speedup);
+    printf("Hatékonyság: %.2f\n", efficiency);
+
+    free(arr);
+    free(workData);
+
+    return 0;
+}
+// A program futtatása során 100 elemmel és 4 szállal végezve a számításokat, az eredmények a következők lehetnek:
+//Munka: 400
+//Költség: 300
+//Gyorsítás: 0.80
+//Hatékonyság: 0.20
