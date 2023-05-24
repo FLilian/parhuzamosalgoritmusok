@@ -1,0 +1,78 @@
+// Végezzen számításokat hiperkocka topológia esetében!
+
+//Számítsa ki, hogy 30 dimenzióig hogyan változik a csomópontok és az élek száma!
+
+//Határozza meg 8 dimenzióban a csomópontok közötti távolságok eloszlását!
+
+//Ábrázolja a kapott eredményt hisztogramon!
+
+//Számítsa ki 20 dimenzióig az átlagos távolságokat! 
+//Pythont használok ehhez a feladat megoldáshoz
+
+//A feladat első részében számoljuk ki a csomópontok és az élek számát 30 dimenzióig:
+import matplotlib.pyplot as plt
+
+dimensions = range(1, 31)
+nodes = []
+edges = []
+
+for dim in dimensions:
+    node_count = 2 ** dim
+    edge_count = dim * (2 ** (dim - 1))
+    nodes.append(node_count)
+    edges.append(edge_count)
+
+plt.plot(dimensions, nodes, label='Nodes')
+plt.plot(dimensions, edges, label='Edges')
+plt.xlabel('Dimensions')
+plt.ylabel('Count')
+plt.title('Number of Nodes and Edges in Hypercube Topology')
+plt.legend()
+plt.show()
+
+//A második részben a csomópontok közötti távolságok eloszlását határozzuk meg 8 dimenzióban:
+import numpy as np
+
+def hamming_distance(a, b):
+    return bin(a ^ b).count('1')
+
+dimensions = 8
+node_count = 2 ** dimensions
+distances = []
+
+for i in range(node_count):
+    for j in range(i+1, node_count):
+        distance = hamming_distance(i, j)
+        distances.append(distance)
+
+plt.hist(distances, bins=range(dimensions+1))
+plt.xlabel('Distance')
+plt.ylabel('Frequency')
+plt.title('Distribution of Distances in 8-dimensional Hypercube')
+plt.xticks(range(dimensions+1))
+plt.show()
+
+//A harmadik részben pedig számoljuk ki az átlagos távolságokat 20 dimenzióig:
+
+dimensions = range(1, 21)
+average_distances = []
+
+for dim in dimensions:
+    node_count = 2 ** dim
+    total_distance = 0
+
+    for i in range(node_count):
+        for j in range(i+1, node_count):
+            distance = hamming_distance(i, j)
+            total_distance += distance
+
+    average_distance = total_distance / (node_count * (node_count - 1) / 2)
+    average_distances.append(average_distance)
+
+plt.plot(dimensions, average_distances)
+plt.xlabel('Dimensions')
+plt.ylabel('Average Distance')
+plt.title('Average Distance in Hypercube Topology')
+plt.show()
+
+
