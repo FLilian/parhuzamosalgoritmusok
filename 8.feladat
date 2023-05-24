@@ -1,0 +1,318 @@
+//Készítsen egy programot, amely egy tömb elemeinek összegét számítja ki több szál felhasználásával!
+
+//Oldja meg, hogy a program működjön tetszőleges méretű tömbökre is!
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+#define NUM_THREADS 4
+
+typedef struct {
+    int *array;
+    int size;
+    int start;
+    int end;
+    int result;
+} ThreadData;
+
+void *sumArray(void *arg) {
+    ThreadData *data = (ThreadData *)arg;
+    int sum = 0;
+
+    for (int i = data->start; i < data->end; i++) {
+        sum += data->array[i];
+    }
+
+    data->result = sum;
+
+    pthread_exit(NULL);
+}
+
+int main() {
+    int array[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int size = sizeof(array) / sizeof(array[0]);
+    int chunkSize = size / NUM_THREADS;
+
+    pthread_t threads[NUM_THREADS];
+    ThreadData threadData[NUM_THREADS];
+
+    // Szálak létrehozása és indítása
+    for (int i = 0; i < NUM_THREADS; i++) {
+        threadData[i].array = array;
+        threadData[i].size = size;
+        threadData[i].start = i * chunkSize;
+        threadData[i].end = (i == NUM_THREADS - 1) ? size : (i + 1) * chunkSize;
+
+        pthread_create(&threads[i], NULL, sumArray, (void *)&threadData[i]);
+    }
+
+    // Szálak befejezése és eredmények összeadása
+    int totalSum = 0;
+    for (int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(threads[i], NULL);
+        totalSum += threadData[i].result;
+    }
+
+    printf("Array sum: %d\n", totalSum);
+
+    return 0;
+}
+
+
+//Írjon egy programot, amely a tömböt közel egyenlő részekre oszt oldja meg az összegzést!
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+#define NUM_THREADS 4
+
+typedef struct {
+    int *array;
+    int size;
+    int start;
+    int end;
+    int result;
+} ThreadData;
+
+void *sumArray(void *arg) {
+    ThreadData *data = (ThreadData *)arg;
+    int sum = 0;
+
+    for (int i = data->start; i < data->end; i++) {
+        sum += data->array[i];
+    }
+
+    data->result = sum;
+
+    pthread_exit(NULL);
+}
+
+int main() {
+    int array[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int size = sizeof(array) / sizeof(array[0]);
+    int chunkSize = size / NUM_THREADS;
+    int extra = size % NUM_THREADS;
+
+    pthread_t threads[NUM_THREADS];
+    ThreadData threadData[NUM_THREADS];
+
+    int startIndex = 0;
+
+    // Szálak létrehozása és indítása
+    for (int i = 0; i < NUM_THREADS; i++) {
+        threadData[i].array = array;
+        threadData[i].size = size;
+        threadData[i].start = startIndex;
+        threadData[i].end = startIndex + chunkSize + (extra > 0 ? 1 : 0);
+        extra--;
+
+        startIndex = threadData[i].end;
+
+        pthread_create(&threads[i], NULL, sumArray, (void *)&threadData[i]);
+    }
+
+    // Szálak befejezése és eredmények összeadása
+    int totalSum = 0;
+    for (int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(threads[i], NULL);
+        totalSum += threadData[i].result;
+    }
+
+    printf("Array sum: %d\n", totalSum);
+
+    return 0;
+}
+
+
+//Írjon egy programot, amely rekurzív felosztásra épül!
+//A programban a szálak száma paraméterként szerepeljen!
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+#define MAX_THREADS 16
+
+// Struktúra a szálaknak történő adatküldéshez
+typedef struct {
+    int* array;
+    int start;
+    int end;
+    int sum;
+} ThreadData;
+
+// Szálakat futtató függvény
+void* sumArray(void* arg) {
+    ThreadData* data = (ThreadData*)arg;
+
+    int* array = data->array;
+    int start = data->start;
+    int end = data->end;
+
+    // Az adott résztömb összegzése
+    int sum = 0;
+    for (int i = start; i <= end; i++) {
+        sum += array[i];
+    }
+
+    data->sum = sum;
+
+    pthread_exit(NULL);
+}
+
+int main() {
+    int array[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int size = sizeof(array) / sizeof(array[0]);
+    int numThreads;
+
+    printf("Adjon meg egy számot (1-%d) a szálak számához: ", MAX_THREADS);
+    scanf("%d", &numThreads);
+
+    // Szálak inicializálása
+    pthread_t threads[MAX_THREADS];
+    ThreadData threadData[MAX_THREADS];
+
+    // Szálak indítása és futtatása
+    int elementsPerThread = size / numThreads;
+    int remainingElements = size % numThreads;
+    int startIndex = 0;
+
+    for (int i = 0; i < numThreads; i++) {
+        int endIndex = startIndex + elementsPerThread - 1;
+
+        if (i == numThreads - 1) {
+            endIndex += remainingElements;
+        }
+
+        threadData[i].array = array;
+        threadData[i].start = startIndex;
+        threadData[i].end = endIndex;
+
+        pthread_create(&threads[i], NULL, sumArray, (void*)&threadData[i]);
+
+        startIndex = endIndex + 1;
+    }
+
+    // Szálak befejezésének várása
+    int totalSum = 0;
+
+    for (int i = 0; i < numThreads; i++) {
+        pthread_join(threads[i], NULL);
+        totalSum += threadData[i].sum;
+    }
+
+    printf("Array sum: %d\n", totalSum);
+
+    return 0;
+}
+
+
+
+//Hasonlítsa össze a p =1 esetet a szekvenciális változattal futási idő tekintetében!
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <time.h>
+
+#define MAX_THREADS 16
+
+// Struktúra a szálaknak történő adatküldéshez
+typedef struct {
+    int* array;
+    int start;
+    int end;
+    int sum;
+} ThreadData;
+
+// Szálakat futtató függvény
+void* sumArray(void* arg) {
+    ThreadData* data = (ThreadData*)arg;
+
+    int* array = data->array;
+    int start = data->start;
+    int end = data->end;
+
+    // Az adott résztömb összegzése
+    int sum = 0;
+    for (int i = start; i <= end; i++) {
+        sum += array[i];
+    }
+
+    data->sum = sum;
+
+    pthread_exit(NULL);
+}
+
+int main() {
+    int array[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int size = sizeof(array) / sizeof(array[0]);
+    int numThreads = 1;
+
+    // Szekvenciális változat futási idejének mérése
+    clock_t seqStart = clock();
+    int seqSum = 0;
+    for (int i = 0; i < size; i++) {
+        seqSum += array[i];
+    }
+    clock_t seqEnd = clock();
+    double seqTime = (double)(seqEnd - seqStart) / CLOCKS_PER_SEC;
+
+    // Párhuzamos változat futási idejének mérése
+    clock_t parStart = clock();
+
+    // Szálak inicializálása
+    pthread_t threads[MAX_THREADS];
+    ThreadData threadData[MAX_THREADS];
+
+    // Szálak indítása és futtatása
+    int elementsPerThread = size / numThreads;
+    int remainingElements = size % numThreads;
+    int startIndex = 0;
+
+    for (int i = 0; i < numThreads; i++) {
+        int endIndex = startIndex + elementsPerThread - 1;
+
+        if (i == numThreads - 1) {
+            endIndex += remainingElements;
+        }
+
+        threadData[i].array = array;
+        threadData[i].start = startIndex;
+        threadData[i].end = endIndex;
+
+        pthread_create(&threads[i], NULL, sumArray, (void*)&threadData[i]);
+
+        startIndex = endIndex + 1;
+    }
+
+    // Szálak befejezésének várása
+    int parSum = 0;
+
+    for (int i = 0; i < numThreads; i++) {
+        pthread_join(threads[i], NULL);
+        parSum += threadData[i].sum;
+    }
+
+    clock_t parEnd = clock();
+    double parTime = (double)(parEnd - parStart) / CLOCKS_PER_SEC;
+
+    printf("Sequential sum: %d\n", seqSum);
+    printf("Parallel sum: %d\n", parSum);
+    printf("Sequential time: %f seconds\n", seqTime);
+    printf("Parallel time: %f seconds\n", parTime);
+
+    return 0;
+}
+
+//Adjon becslést a T(n,p) függvényre 
+T(n, p) <= T(n, 1) / p + O(1)
+//Adjon becslést a gyorsításra
+A gyorsítás becslését a következőképpen adhatjuk meg:
+
+Speedup(n, p) = T(n, 1) / T(n, p)
+
+Ez azt jelenti, hogy a gyorsítás az egyszálú algoritmushoz képest mennyire képes felgyorsítani a párhuzamos algoritmus a feladatot.
+Ideális esetben a gyorsítás lineáris lenne, azaz Speedup(n, p) ≈ p, ahol p a szálak száma.
+
