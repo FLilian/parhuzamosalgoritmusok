@@ -1,0 +1,44 @@
+#include <stdio.h>
+
+#define MAX_DEPTH 10
+
+// CREW_PREFIX algoritmus
+void crewPrefix(int* arr, int size, int depth) {
+    if (depth >= MAX_DEPTH) {
+        return;
+    }
+
+    for (int i = 0; i < size; i++) {
+        printf("crewprefix_%d -> crewprefix_%d;\n", depth, depth + 1);
+        crewPrefix(arr, size, depth + 1);
+    }
+}
+
+int main() {
+    // Tömb adatok
+    int arr[] = {1, 2, 3, 4, 5};
+    int size = sizeof(arr) / sizeof(arr[0]);
+
+    // Kimeneti fájl megnyitása írásra
+    FILE* file = fopen("callgraph.dot", "w");
+    if (file == NULL) {
+        printf("Hiba a fajl megnyitasa soran.\n");
+        return 1;
+    }
+
+    // GraphViz fájl fejléce
+    fprintf(file, "digraph CallGraph {\n");
+
+    // CREW_PREFIX hívások generálása
+    crewPrefix(arr, size, 0);
+
+    // GraphViz fájl lábléce
+    fprintf(file, "}\n");
+
+    // Kimeneti fájl bezárása
+    fclose(file);
+
+    printf("A hivasi fa sikeresen letrejott a callgraph.dot fajlban.\n");
+
+    return 0;
+}
