@@ -1,0 +1,76 @@
+//Definiáljon egy Topic struktúrát és a hozzá tartozó műveleteket, függvényeket!
+
+#include <iostream>
+#include <string>
+#include <vector>
+
+struct Topic {
+    std::string title;
+    std::vector<std::string> messages;
+
+    void addMessage(const std::string& message) {
+        messages.push_back(message);
+    }
+
+    void printTopic() const {
+        std::cout << "Topic: " << title << std::endl;
+        std::cout << "Messages:" << std::endl;
+        for (const auto& message : messages) {
+            std::cout << "- " << message << std::endl;
+        }
+    }
+};
+
+int main() {
+    Topic topic;
+    topic.title = "Sample Topic";
+    topic.addMessage("Hello!");
+    topic.addMessage("This is a sample message.");
+    topic.addMessage("Goodbye!");
+
+    topic.printTopic();
+
+    return 0;
+}
+//Definiálja a subscribe függvényt, amellyel fel lehet iratkozni egy létrehozott topic-ra! (A feliratkozás során használjon callback függvényt!)
+#include <iostream>
+#include <string>
+#include <vector>
+#include <functional>
+
+struct Topic {
+    std::string title;
+    std::vector<std::string> messages;
+    std::vector<std::function<void(const std::string&)>> subscribers;
+
+    void addMessage(const std::string& message) {
+        messages.push_back(message);
+        notifySubscribers(message);
+    }
+
+    void subscribe(const std::function<void(const std::string&)>& callback) {
+        subscribers.push_back(callback);
+    }
+
+    void notifySubscribers(const std::string& message) {
+        for (const auto& subscriber : subscribers) {
+            subscriber(message);
+        }
+    }
+};
+
+void callbackFunction(const std::string& message) {
+    std::cout << "New message received: " << message << std::endl;
+}
+
+int main() {
+    Topic topic;
+    topic.title = "Sample Topic";
+    topic.subscribe(callbackFunction);
+
+    topic.addMessage("Hello!");
+    topic.addMessage("This is a sample message.");
+    topic.addMessage("Goodbye!");
+
+    return 0;
+}
