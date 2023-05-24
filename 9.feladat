@@ -1,0 +1,277 @@
+//Implementálja a (dinamikus) tömb (Array), a láncolt lista (List), a sor (Queue) és a verem (Stack) adatstruktúrákat (először szálkezelés nélkül)!
+#include <iostream>
+
+// Dinamikus tömb (Array) implementációja
+class Array {
+private:
+    int* data;
+    int size;
+    int capacity;
+
+public:
+    Array() {
+        data = nullptr;
+        size = 0;
+        capacity = 0;
+    }
+
+    ~Array() {
+        delete[] data;
+    }
+
+    void push(int value) {
+        if (size == capacity) {
+            // Ha megtelt a tömb, növeljük a kapacitását
+            int newCapacity = (capacity == 0) ? 1 : capacity * 2;
+            int* newData = new int[newCapacity];
+
+            for (int i = 0; i < size; i++) {
+                newData[i] = data[i];
+            }
+
+            delete[] data;
+
+            data = newData;
+            capacity = newCapacity;
+        }
+
+        data[size] = value;
+        size++;
+    }
+
+    int get(int index) {
+        if (index >= 0 && index < size) {
+            return data[index];
+        } else {
+            throw std::out_of_range("Invalid index");
+        }
+    }
+
+    int getSize() {
+        return size;
+    }
+};
+
+// Láncolt lista (List) implementációja
+class List {
+private:
+    struct Node {
+        int value;
+        Node* next;
+
+        Node(int val) {
+            value = val;
+            next = nullptr;
+        }
+    };
+
+    Node* head;
+    int size;
+
+public:
+    List() {
+        head = nullptr;
+        size = 0;
+    }
+
+    ~List() {
+        Node* current = head;
+        while (current != nullptr) {
+            Node* next = current->next;
+            delete current;
+            current = next;
+        }
+    }
+
+    void push(int value) {
+        Node* newNode = new Node(value);
+
+        if (head == nullptr) {
+            head = newNode;
+        } else {
+            Node* current = head;
+            while (current->next != nullptr) {
+                current = current->next;
+            }
+            current->next = newNode;
+        }
+
+        size++;
+    }
+
+    int get(int index) {
+        if (index >= 0 && index < size) {
+            Node* current = head;
+            for (int i = 0; i < index; i++) {
+                current = current->next;
+            }
+            return current->value;
+        } else {
+            throw std::out_of_range("Invalid index");
+        }
+    }
+
+    int getSize() {
+        return size;
+    }
+};
+
+// Sor (Queue) implementációja
+class Queue {
+private:
+    struct Node {
+        int value;
+        Node* next;
+
+        Node(int val) {
+            value = val;
+            next = nullptr;
+        }
+    };
+
+    Node* front;
+    Node* rear;
+    int size;
+
+public:
+    Queue() {
+        front = nullptr;
+        rear = nullptr;
+        size = 0;
+    }
+
+    ~Queue() {
+        Node* current = front;
+        while (current != nullptr) {
+            Node* next = current->next;
+            delete current;
+            current = next;
+        }
+    }
+
+    void enqueue(int value) {
+        Node* newNode = new Node(value);
+
+        if (front == nullptr) {
+            front = newNode;
+            rear = newNode;
+        } else {
+            rear->next = newNode;
+            rear = newNode;
+        }
+
+        size++;
+    }
+
+    int dequeue() {
+        if (front != nullptr) {
+            int value = front->value;
+            Node* temp = front;
+            front = front->next;
+            delete temp;
+
+            if (front == nullptr) {
+                rear = nullptr;
+            }
+
+            size--;
+            return value;
+        } else {
+            throw std::runtime_error("Queue is empty");
+        }
+    }
+
+    int getSize() {
+        return size;
+    }
+};
+
+// Verem (Stack) implementációja
+class Stack {
+private:
+    struct Node {
+        int value;
+        Node* next;
+
+        Node(int val) {
+            value = val;
+            next = nullptr;
+        }
+    };
+
+    Node* top;
+    int size;
+
+public:
+    Stack() {
+        top = nullptr;
+        size = 0;
+    }
+
+    ~Stack() {
+        Node* current = top;
+        while (current != nullptr) {
+            Node* next = current->next;
+            delete current;
+            current = next;
+        }
+    }
+
+    void push(int value) {
+        Node* newNode = new Node(value);
+        newNode->next = top;
+        top = newNode;
+        size++;
+    }
+
+    int pop() {
+        if (top != nullptr) {
+            int value = top->value;
+            Node* temp = top;
+            top = top->next;
+            delete temp;
+            size--;
+            return value;
+        } else {
+            throw std::runtime_error("Stack is empty");
+        }
+    }
+
+    int getSize() {
+        return size;
+    }
+};
+
+int main() {
+    // Példa használat
+    Array array;
+    List list;
+    Queue queue;
+    Stack stack;
+
+    // Tömb
+    array.push(1);
+    array.push(2);
+    array.push(3);
+    std::cout << "Array size: " << array.getSize() << std::endl;
+
+    // Láncolt lista
+    list.push(4);
+    list.push(5);
+    list.push(6);
+    std::cout << "List size: " << list.getSize() << std::endl;
+
+    // Sor
+    queue.enqueue(7);
+    queue.enqueue(8);
+    queue.enqueue(9);
+    std::cout << "Queue size: " << queue.getSize() << std::endl;
+
+    // Verem
+    stack.push(10);
+    stack.push(11);
+    stack.push(12);
+    std::cout << "Stack size: " << stack.getSize() << std::endl;
+
+    return 0;
+}
