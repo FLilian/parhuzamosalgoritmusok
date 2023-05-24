@@ -1,0 +1,34 @@
+// posix szálak
+//Készítsünk olyan programot, amelynél a fő szál 8 másodpercnyi számítást végez el, míg az általa indított csak 4-et! Vizsgáljuk meg a fordított esetet is!
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
+
+void *calculation(void *arg) {
+    int id = *((int *)arg);
+    printf("Thread %d: Calculation started\n", id);
+    sleep(4);  // Rövidebb számítás
+    printf("Thread %d: Calculation finished\n", id);
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t thread;
+    int thread_id = 1;
+
+    printf("Main thread: Calculation started\n");
+    sleep(8);  // Hosszabb számítás
+
+    // Szál indítása
+    printf("Main thread: Starting new thread\n");
+    pthread_create(&thread, NULL, calculation, (void *)&thread_id);
+
+    printf("Main thread: Calculation finished\n");
+
+    // Szál befejezése
+    pthread_join(thread, NULL);
+
+    return 0;
+}
+
