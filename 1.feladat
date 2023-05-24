@@ -1,1 +1,30 @@
+//egy program írása ami generál n db véletlen számot a és b között . n,a,b értékeit a felhasználótól kérje be az eredményt írja ki egy txt fájlba
+
+#include <stdio.h>
+
+int main() {
+    FILE* file;
+    const char* filename = "szamok.txt";
+    int n, a, b;
+    printf("Adja meg az n, a, b ertekeit (valos szamok): ");
+    scanf_s("%d %d %d", &n, &a, &b);
+
+    errno_t err = fopen_s(&file, filename, "w");
+    if (err == 0) {
+        srand((unsigned int)time(NULL));
+
+        for (int i = 0; i < n; i++) {
+            int randomNum = rand() % (b - a + 1) + a;
+            fprintf(file, "%d\n", randomNum);
+        }
+
+        fclose(file);
+        printf("%d db veletlen szam generalva es kiirva a szamok.txt fajlba.\n", n);
+    }
+    else {
+        printf("Hiba tortent a fajl megnyitasa soran.\n");
+    }
+
+    return 0;
+}
 
