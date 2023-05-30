@@ -1,55 +1,71 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <stdbool.h>
 
-// Gyors hatványozás moduláris aritmetikával
-unsigned long long fastModExp(unsigned long long base, unsigned long long exp, unsigned long long mod) {
-    unsigned long long result = 1;
-    base = base % mod;
+typedef struct {
+    int number;
+    int iterations;
+    bool isPrime;
+} ThreadArgs;
 
-    while (exp > 0) {
-        if (exp % 2 == 1) {
-            result = (result * base) % mod;
-        }
-        base = (base * base) % mod;
-        exp = exp / 2;
-    }
-
-    return result;
-}
-
-// Fermat-prímteszt
-int fermatTest(unsigned long long n, int iterations) {
-    if (n <= 1) {
-        return 0;
-    }
-    if (n <= 3) {
-        return 1;
-    }
+void *fermatPrimeTest(void *arg) {
+    ThreadArgs *args = (ThreadArgs *)arg;
+    int n = args->number;
+    int iterations = args->iterations;
+    bool isPrime = true;
 
     for (int i = 0; i < iterations; i++) {
-        unsigned long long a = 2 + rand() % (n - 3);
-        unsigned long long result = fastModExp(a, n - 1, n);
+        int a = rand() % (n - 2) + 2;
+
+
+        int result = 1;
+        for (int j = 0; j < n - 1; j++) {
+            result = (result * a) % n;
+        }
 
         if (result != 1) {
-            return 0;
+            isPrime = false;
+            break;
         }
     }
 
-    return 1;
+    args->isPrime = isPrime;
+    pthread_exit(NULL);
 }
 
 int main() {
-    unsigned long long number;
-    int iterations;
-    printf("Adj meg egy szamot: ");
-    scanf_s("%llu", &number);
-    printf("Adj meg egy iteracios szamot: ");
-    scanf_s("%d", &iterations);
+    int number, iterations, numThreads;
 
-    if (fermatTest(number, iterations)) {
-        printf("%llu primszam.\n", number);
+    printf_s('Adjon meg egy szamot: ');
+    scanf('%d', &number);
+    printf_s('Adjon meg egy iteracios szamot: ');
+    scanf('%d', &iterations);
+    printf_s('Adjon meg a szalak szamat: ');
+    scanf('%d', &numThreads);
+
+    pthread_t threads[numThreads];
+    ThreadArgs args[numThreads];
+
+    for (int i = 0; i < numThreads; i++) {
+        args[i].number = number;
+        args[i].iterations = iterations;
+        pthread_create(&threads[i], NULL, fermatPrimeTest, (void *)&args[i]);
     }
-    else {
-        printf("%llu nem primszam.\n", number);
+
+    bool isPrime = true;
+    for (int i = 0; i < numThreads; i++) {
+        pthread_join(threads[i], NULL);
+        if (!args[i].isPrime) {
+            isPrime = false;
+            break;
+        }
+    }
+
+    if (isPrime) {
+        printf('%d prim.\n', number);
+    } else {
+        printf('%d nem prim.\n', number);
     }
 
     return 0;
